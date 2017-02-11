@@ -44,6 +44,7 @@ public class SpaceImpact extends BasicGame {
 	
 	private int level;
 	private int mode;
+	private int highscore;
 	private int direction;
 	private boolean stuck;
 	private Random rand;
@@ -57,6 +58,7 @@ public class SpaceImpact extends BasicGame {
 		this.player = Player.getInstance();
 		this.mode = 0;
 		this.level = 1;
+		this.highscore = Config.getScore();
 		this.direction = NEUTRAL;
 		this.stuck = false;
 		this.rand = new Random();
@@ -107,6 +109,7 @@ public class SpaceImpact extends BasicGame {
 				stuck = true;
 			} else if(input.isKeyDown(Input.KEY_ENTER)) {
 				this.mode = 1;
+				this.player.reset();
 			} else {
 				stuck = false;
 			}
@@ -120,7 +123,16 @@ public class SpaceImpact extends BasicGame {
 			}
 			
 			if(player.isDead()) {
-				JOptionPane.showMessageDialog(null, "Game over! Score: " + this.player.getScore());
+				if(highscore > this.player.getScore()) {
+					JOptionPane.showMessageDialog(null, "Game over! Score: " + this.player.getScore());
+				} else {
+					String contactDetails = JOptionPane.showInputDialog(null, 
+							"New Highscore!\nEnter your name and cellphone number:\n(Name/Cellphone Number)",
+							JOptionPane.PLAIN_MESSAGE);
+					
+					this.highscore = this.player.getScore();
+					Config.saveScore(highscore, contactDetails);
+				}
 				this.reset();
 				input = null;
 			}
@@ -141,7 +153,7 @@ public class SpaceImpact extends BasicGame {
 		renderGame(graphics);
 		if(mode == 0) {
 			renderMenu(graphics);
-			graphics.drawString("High Score: 0", Config.WIDTH - 150, 10);
+			graphics.drawString("High Score: " + this.highscore, Config.WIDTH - 150, 10);
 		} else {
 			graphics.drawString("Score: " + player.getScore(), Config.WIDTH - 150, 10);
 		}
