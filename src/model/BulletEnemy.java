@@ -1,7 +1,5 @@
 package model;
 
-import org.newdawn.slick.geom.Rectangle;
-
 public class BulletEnemy extends Bullet {
 	public BulletEnemy(Enemy e) {
 		super(e.getX() + (Enemy.WIDTH-Bullet.WIDTH)/2, e.getY());

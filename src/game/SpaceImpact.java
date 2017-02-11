@@ -1,6 +1,5 @@
 package game;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
@@ -16,7 +15,6 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 
 import model.Bullet;
-import model.BulletEnemy;
 import model.BulletPlayer;
 import model.Cloud;
 import model.Enemy;

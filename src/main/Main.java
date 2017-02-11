@@ -10,7 +10,7 @@ public class Main {
 	public static void main(String[] args) {
 		AppGameContainer app;
 		try {
-			app = new AppGameContainer(new SpaceImpact("Space Impact"));
+			app = new AppGameContainer(new SpaceImpact("Where do broken hearts go?"));
 			app.setDisplayMode(Config.WIDTH, Config.HEIGHT, false);
 			app.setTargetFrameRate(60); //cap FPS to 60
 			app.setShowFPS(Config.DEBUG);

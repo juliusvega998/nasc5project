@@ -1,9 +1,5 @@
 package model;
 
-import java.util.ConcurrentModificationException;
-
-import org.newdawn.slick.geom.Rectangle;
-
 public class BulletPlayer extends Bullet {
 	private Player owner;
 	
