@@ -40,6 +40,7 @@ public class SpaceImpact extends BasicGame {
 	private Image eBulletSprite;
 	
 	private Image cloudSprite;
+	private Image logo;
 	
 	private int level;
 	private int mode;
@@ -62,12 +63,13 @@ public class SpaceImpact extends BasicGame {
 		
 		this.playerSheet = new SpriteSheet("resources/cupid2.png", 300, 300);
 		this.enemySheet = new Animation(new SpriteSheet("resources/Enemy.png", 225, 225), 100);
+		
 		this.eBulletSprite = new Image("resources/enemy_bullet.png");
 		this.pBulletSheet = new Image("resources/cuArrow.png");
 		this.cloudSprite = new Image("resources/cloud.png");
+		this.logo = new Image("resources/logo.png");
 		
 		clouds = new Cloud[CLOUD_NO];
-		
 		for(int i=0; i<CLOUD_NO; i++) {
 			clouds[i] = new Cloud(rand.nextInt(Config.WIDTH/2)+Config.WIDTH/4, rand.nextInt((Config.HEIGHT-100)/2)+100);
 		}
@@ -149,7 +151,7 @@ public class SpaceImpact extends BasicGame {
 		graphics.setBackground(new Color(224, 247, 250));
 		graphics.setColor(Color.black);
 		
-		graphics.drawString("Controls:\nUp or W to go up\nDown or S to go down\nLeft or A to go left\nRight or D to go right\nSpace to fire", 50, 50);
+		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, 100);
 		
 		if(!this.stuck) {
 			graphics.drawString("Press enter to start the game...", Config.WIDTH-300, Config.HEIGHT-50);
