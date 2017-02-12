@@ -6,8 +6,8 @@ import util.Config;
 
 public class Player extends Entity {
 	public static final float SPEED = 5;
-	public static final int WIDTH = 20;
-	public static final int HEIGHT = 20;
+	public static final int WIDTH = 30;
+	public static final int HEIGHT = 30;
 	
 	private static final Player instance = new Player();
 	

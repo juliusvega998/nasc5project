@@ -108,6 +108,8 @@ public class SpaceImpact extends BasicGame {
 			} else if(input.isKeyDown(Input.KEY_ENTER)) {
 				this.mode = 1;
 				this.player.reset();
+			} else if(input.isKeyPressed(Input.KEY_ESCAPE)) {
+				System.exit(0);
 			} else {
 				stuck = false;
 			}
@@ -159,12 +161,14 @@ public class SpaceImpact extends BasicGame {
 	
 	public void renderMenu(Graphics graphics) {
 		graphics.setBackground(new Color(224, 247, 250));
-		graphics.setColor(Color.black);
+		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, Config.HEIGHT/10);
 		
-		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, 100);
-		
-		if(!this.stuck) {
-			graphics.drawString("Press enter to start the game...", Config.WIDTH-300, Config.HEIGHT-50);
+		if(this.stuck) {
+			graphics.setColor(Color.red);
+			graphics.drawString("Keyboard seems pressed.\nIf not press the arrow keys and the WASD keys...", Config.WIDTH-500, Config.HEIGHT-75);
+		} else {
+			graphics.setColor(Color.black);
+			graphics.drawString("Press enter to start the game...", Config.WIDTH-500, Config.HEIGHT-50);
 		}
 	}
 	

@@ -10,8 +10,8 @@ import util.Config;
 public class Enemy extends Entity {
 	public static final ArrayList<Enemy> ENEMIES = new ArrayList<>();
 	
-	public static final int WIDTH = 15;
-	public static final int HEIGHT = 15;
+	public static final int WIDTH = 25;
+	public static final int HEIGHT = 25;
 	public static final float SPEED = 1;
 	
 	private Random rand;

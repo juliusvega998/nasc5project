@@ -9,8 +9,8 @@ public abstract class Bullet extends Entity {
 	public static final float SPEED = 0.1f;
 	public static final long TIME = 10;
 	
-	public static final int WIDTH = 5;
-	public static final int HEIGHT = 10;
+	public static final int WIDTH = 10;
+	public static final int HEIGHT = 15;
 	
 	protected Thread move;
 	

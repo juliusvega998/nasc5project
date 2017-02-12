@@ -7,10 +7,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 public class Config {
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	
-	public static final int WIDTH = 1024;
-	public static final int HEIGHT = 576;
+	public static final int WIDTH = 1600;
+	public static final int HEIGHT = 900;
 	
 	public static int getScore() {
 		try {
