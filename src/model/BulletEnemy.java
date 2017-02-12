@@ -1,5 +1,9 @@
 package model;
 
+import org.newdawn.slick.Sound;
+
+import model.enemy.Enemy;
+
 public class BulletEnemy extends Bullet {
 	public BulletEnemy(Enemy e) {
 		super(e.getX() + (Enemy.WIDTH-Bullet.WIDTH)/2, e.getY());
@@ -27,7 +31,7 @@ public class BulletEnemy extends Bullet {
 					Thread.currentThread().interrupt();
 				}
 				
-				BULLETS.remove(BulletEnemy.this);
+				Bullet.BULLETS.remove(BulletEnemy.this);
 			}
 		};
 		

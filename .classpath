@@ -8,5 +8,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="BeatTheHighscore/libraries/native/windows"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libraries/jar/jogg-0.0.7.jar"/>
+	<classpathentry kind="lib" path="libraries/jar/jorbis-0.0.17-1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

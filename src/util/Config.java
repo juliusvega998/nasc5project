@@ -9,8 +9,8 @@ import java.io.FileWriter;
 public class Config {
 	public static final boolean DEBUG = false;
 	
-	public static final int WIDTH = 1600;
-	public static final int HEIGHT = 900;
+	public static final int WIDTH = 1344;
+	public static final int HEIGHT = 756;
 	
 	public static int getScore() {
 		try {

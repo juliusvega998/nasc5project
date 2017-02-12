@@ -11,14 +11,18 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.Sound;
 import org.newdawn.slick.SpriteSheet;
 
 import model.Bullet;
 import model.BulletPlayer;
 import model.Cloud;
-import model.Enemy;
 import model.Player;
+import model.enemy.Enemy;
+import model.enemy.EnemyFast;
+import model.enemy.EnemyStrong;
 import util.Config;
 
 public class SpaceImpact extends BasicGame {
@@ -40,6 +44,13 @@ public class SpaceImpact extends BasicGame {
 	private Image cloudSprite;
 	private Image logo;
 	
+	private Sound cupidFire;
+	private Sound enemyFire;
+	private Sound cupidDead;
+	private Sound enemyHurt;
+	
+	private Music music;
+	
 	private int level;
 	private int mode;
 	private int highscore;
@@ -53,7 +64,6 @@ public class SpaceImpact extends BasicGame {
 
 	@Override
 	public void init(GameContainer container) throws SlickException {
-		this.player = Player.getInstance();
 		this.mode = 0;
 		this.level = 1;
 		this.highscore = Config.getScore();
@@ -61,13 +71,22 @@ public class SpaceImpact extends BasicGame {
 		this.stuck = false;
 		this.rand = new Random();
 		
-		this.playerSheet = new SpriteSheet("resources/cupid2.png", 300, 300);
-		this.enemySheet = new Animation(new SpriteSheet("resources/Enemy.png", 225, 225), 100);
+		this.playerSheet = new SpriteSheet("resources/img/cupid2.png", 300, 300);
+		this.enemySheet = new Animation(new SpriteSheet("resources/img/Enemy.png", 225, 225), 100);
 		
-		this.eBulletSprite = new Image("resources/enemy_bullet.png");
-		this.pBulletSheet = new Image("resources/cuArrow.png");
-		this.cloudSprite = new Image("resources/cloud.png");
-		this.logo = new Image("resources/logo.png");
+		this.cupidFire = new Sound("resources/sound/cupid_shoot.wav");
+		this.enemyFire = new Sound("resources/sound/enemy_shoot.wav");
+		this.cupidDead = new Sound("resources/sound/cupid_dead.wav");
+		this.enemyHurt = new Sound("resources/sound/enemy_dead.wav");
+		
+		this.music = new Music("resources/sound/music.ogg");
+		
+		this.player = Player.getInstance(cupidFire, cupidDead);
+		
+		this.eBulletSprite = new Image("resources/img/enemy_bullet.png");
+		this.pBulletSheet = new Image("resources/img/cuArrow.png");
+		this.cloudSprite = new Image("resources/img/cloud.png");
+		this.logo = new Image("resources/img/logo.png");
 		
 		clouds = new Cloud[CLOUD_NO];
 		for(int i=0; i<CLOUD_NO; i++) {
@@ -107,22 +126,47 @@ public class SpaceImpact extends BasicGame {
 				stuck = true;
 			} else if(input.isKeyDown(Input.KEY_ENTER)) {
 				this.mode = 1;
+				this.music.loop();
 				this.player.reset();
 			} else if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 				System.exit(0);
 			} else {
 				stuck = false;
 			}
-			
 		} else {
 			if(Enemy.ENEMIES.size() == 0) {
 				for(int i=0; i<level; i++) {
-					new Enemy(rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, rand.nextInt(200) + 50);
+					new Enemy(
+							rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, 
+							rand.nextInt(200) + 50, 
+							this.enemyHurt, 
+							this.enemyFire
+					);
+				}
+				
+				for(int i=0; i<level/5; i++) {
+					new EnemyStrong(
+							rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, 
+							rand.nextInt(200) + 50, 
+							this.enemyHurt, 
+							this.enemyFire
+					);
+				}
+				
+				for(int i=0; i<level/3; i++) {
+					new EnemyFast(
+							rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, 
+							rand.nextInt(200) + 50, 
+							this.enemyHurt, 
+							this.enemyFire
+					);
 				}
 				level++;
 			}
 			
 			if(player.isDead()) {
+				this.music.pause();
+				
 				if(highscore > this.player.getScore()) {
 					JOptionPane.showMessageDialog(null, "Game over! Score: " + this.player.getScore());
 				} else {
@@ -163,6 +207,9 @@ public class SpaceImpact extends BasicGame {
 		graphics.setBackground(new Color(224, 247, 250));
 		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, Config.HEIGHT/10);
 		
+		graphics.setColor(Color.black);
+		graphics.drawString("Music: http://www.bensound.com/", 100, Config.HEIGHT-50);
+		
 		if(this.stuck) {
 			graphics.setColor(Color.red);
 			graphics.drawString("Keyboard seems pressed.\nIf not press the arrow keys and the WASD keys...", Config.WIDTH-500, Config.HEIGHT-75);
@@ -193,7 +240,11 @@ public class SpaceImpact extends BasicGame {
 			}
 			
 			for(int i=0; i<Enemy.ENEMIES.size(); i++) {
-				enemySheet.draw(Enemy.ENEMIES.get(i).getX(), Enemy.ENEMIES.get(i).getY(), Enemy.WIDTH, Enemy.HEIGHT);
+				if(Enemy.ENEMIES.get(i) instanceof EnemyStrong) {
+					enemySheet.draw(Enemy.ENEMIES.get(i).getX(), Enemy.ENEMIES.get(i).getY(), EnemyStrong.WIDTH, EnemyStrong.HEIGHT);
+				} else {
+					enemySheet.draw(Enemy.ENEMIES.get(i).getX(), Enemy.ENEMIES.get(i).getY(), Enemy.WIDTH, Enemy.HEIGHT);
+				}
 			}
 		} catch(Exception e) {
 			e.printStackTrace();

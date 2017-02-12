@@ -1,5 +1,7 @@
 package model;
 
+import model.enemy.Enemy;
+
 public class BulletPlayer extends Bullet {
 	private Player owner;
 	
@@ -49,6 +51,7 @@ public class BulletPlayer extends Bullet {
 			for(int i=0; i<Enemy.ENEMIES.size(); i++) {
 				if(this.boundingRect().intersects(Enemy.ENEMIES.get(i).boundingRect())) {
 					Enemy.ENEMIES.get(i).interrupt();
+					Enemy.ENEMIES.get(i).playDead();
 					Enemy.ENEMIES.remove(Enemy.ENEMIES.get(i));
 					
 					return true;
