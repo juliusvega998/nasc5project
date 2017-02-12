@@ -20,7 +20,7 @@ public class Player extends Entity {
 	private static Player instance;
 	
 	private Player(Sound fire, Sound killed) {
-		super(100, Config.HEIGHT - 100);
+		super((Config.WIDTH-Player.WIDTH)/2, (Config.HEIGHT-Player.HEIGHT)*0.75f);
 		this.score = 0;
 		this.fired = false;
 		this.dead = false;
@@ -95,6 +95,10 @@ public class Player extends Entity {
 	
 	public int getScore() {
 		return this.score;
+	}
+	
+	public boolean getFired() {
+		return this.fired;
 	}
 	
 	public boolean isDead() {

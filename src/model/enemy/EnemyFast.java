@@ -54,7 +54,7 @@ public class EnemyFast extends Enemy {
 				try{
 					while(!this.isInterrupted()) {
 						new BulletEnemy(EnemyFast.this);
-						if(!Player.getInstance().isDead()) shoot.play();
+						shoot.play();
 						Thread.sleep(rand.nextInt(900) + 100);
 					}
 				} catch(InterruptedException e) {

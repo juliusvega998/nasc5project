@@ -53,7 +53,7 @@ public class EnemyStrong extends Enemy {
 					while(!this.isInterrupted()) {
 						for(int i=0; i<5 && !this.isInterrupted(); i++) {
 							new BulletEnemy(EnemyStrong.this);
-							if(!Player.getInstance().isDead()) shoot.play();
+							shoot.play();
 							Thread.sleep(200);
 						}
 						Thread.sleep(rand.nextInt(200) + 900);

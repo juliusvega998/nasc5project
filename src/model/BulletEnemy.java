@@ -1,7 +1,5 @@
 package model;
 
-import org.newdawn.slick.Sound;
-
 import model.enemy.Enemy;
 
 public class BulletEnemy extends Bullet {
@@ -18,7 +16,7 @@ public class BulletEnemy extends Bullet {
 					float increment = SPEED;
 					Player p = Player.getInstance();
 					while(BulletEnemy.this.getY() > 0 || this.isInterrupted()) {
-						if(BulletEnemy.this.boundingRect().intersects(p.boundingRect())) {
+						if(BulletEnemy.this.boundingRect().intersects(p.boundingRect()) && !p.isDead()) {
 							p.kill();
 							break;
 						}

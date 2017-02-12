@@ -71,7 +71,7 @@ public class Enemy extends Entity {
 				try{
 					while(!this.isInterrupted()) {
 						new BulletEnemy(Enemy.this);
-						if(!Player.getInstance().isDead()) shoot.play();
+						shoot.play();
 						Thread.sleep(rand.nextInt(200) + 900);
 					}
 				} catch(InterruptedException e) {

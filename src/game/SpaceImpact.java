@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.Font;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
@@ -15,6 +16,8 @@ import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.SpriteSheet;
+import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.gui.TextField;
 
 import model.Bullet;
 import model.BulletPlayer;
@@ -55,8 +58,12 @@ public class SpaceImpact extends BasicGame {
 	private int mode;
 	private int highscore;
 	private int direction;
-	private boolean stuck;
 	private Random rand;
+	
+	private TrueTypeFont titles;
+	private TrueTypeFont indicators;
+	
+	private TextField inputField;
 	
 	public SpaceImpact(String title) {
 		super(title);
@@ -68,7 +75,6 @@ public class SpaceImpact extends BasicGame {
 		this.level = 1;
 		this.highscore = Config.getScore();
 		this.direction = NEUTRAL;
-		this.stuck = false;
 		this.rand = new Random();
 		
 		this.playerSheet = new SpriteSheet("resources/img/cupid2.png", 300, 300);
@@ -88,10 +94,15 @@ public class SpaceImpact extends BasicGame {
 		this.cloudSprite = new Image("resources/img/cloud.png");
 		this.logo = new Image("resources/img/logo.png");
 		
-		clouds = new Cloud[CLOUD_NO];
+		this.clouds = new Cloud[CLOUD_NO];
 		for(int i=0; i<CLOUD_NO; i++) {
-			clouds[i] = new Cloud(rand.nextInt(Config.WIDTH/2)+Config.WIDTH/4, rand.nextInt((Config.HEIGHT-100)/2)+100);
+			this.clouds[i] = new Cloud(rand.nextInt(Config.WIDTH/2)+Config.WIDTH/4, rand.nextInt((Config.HEIGHT-100)/2)+100);
 		}
+		
+		this.titles = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14), true);
+		this.indicators = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10), true);
+		
+		this.inputField = new TextField(container, titles, Config.WIDTH/2-125, Config.HEIGHT/2-10, 250, 20);
 	}
 
 	@Override
@@ -114,26 +125,19 @@ public class SpaceImpact extends BasicGame {
 			this.player.moveUp();
 		}
 		
-		if(input.isKeyPressed(Input.KEY_SPACE)) {
+		if(input.isKeyPressed(Input.KEY_SPACE) && this.mode < 2) {
 			this.player.fire();
 		}
 		
 		if(mode == 0) {
-			if(input.isKeyDown(Input.KEY_LEFT) || input.isKeyDown(Input.KEY_A)
-					|| input.isKeyDown(Input.KEY_RIGHT) || input.isKeyDown(Input.KEY_D)
-					|| input.isKeyDown(Input.KEY_DOWN) || input.isKeyDown(Input.KEY_S)
-					|| input.isKeyDown(Input.KEY_UP) || input.isKeyDown(Input.KEY_W)) {
-				stuck = true;
-			} else if(input.isKeyDown(Input.KEY_ENTER)) {
+			if(input.isKeyDown(Input.KEY_ENTER)) {
 				this.mode = 1;
 				this.music.loop();
 				this.player.reset();
 			} else if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 				System.exit(0);
-			} else {
-				stuck = false;
 			}
-		} else {
+		} else if(mode == 1) {
 			if(Enemy.ENEMIES.size() == 0) {
 				for(int i=0; i<level; i++) {
 					new Enemy(
@@ -167,18 +171,39 @@ public class SpaceImpact extends BasicGame {
 			if(player.isDead()) {
 				this.music.pause();
 				
-				if(highscore > this.player.getScore()) {
-					JOptionPane.showMessageDialog(null, "Game over! Score: " + this.player.getScore());
+				if(highscore >= this.player.getScore()) {
+					new Thread() {
+						@Override
+						public void run() {
+							try {
+								SpaceImpact.this.mode = 3;
+								Thread.sleep(3000);
+							} catch(InterruptedException e) {}
+							SpaceImpact.this.mode = 0;
+							SpaceImpact.this.reset();
+						}
+					}.start();
 				} else {
-					String contactDetails = JOptionPane.showInputDialog(null, 
-							"New Highscore!\nEnter your name and cellphone number:\n(Name/Cellphone Number)",
-							JOptionPane.PLAIN_MESSAGE);
-					
-					this.highscore = this.player.getScore();
-					Config.saveScore(highscore, contactDetails);
+					this.mode = 2;
+					inputField.setFocus(true);
 				}
-				this.reset();
-				input = null;
+			}
+		} else if (mode == 2) {
+			if(input.isKeyDown(Input.KEY_ENTER)) {
+				this.highscore = this.player.getScore();
+				Config.saveScore(highscore, inputField.getText());
+				inputField.setFocus(false);
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							SpaceImpact.this.mode = 3;
+							Thread.sleep(1000);
+						} catch(InterruptedException e) {}
+						SpaceImpact.this.mode = 0;
+						SpaceImpact.this.reset();
+					}
+				}.start();
 			}
 		}
 	}
@@ -197,9 +222,25 @@ public class SpaceImpact extends BasicGame {
 		renderGame(graphics);
 		if(mode == 0) {
 			renderMenu(graphics);
-			graphics.drawString("High Score: " + this.highscore, Config.WIDTH - 150, 10);
+			titles.drawString(Config.WIDTH - 150, 10, "High Score: " + this.highscore, Color.black);
 		} else {
-			graphics.drawString("Score: " + player.getScore(), Config.WIDTH - 150, 10);
+			titles.drawString(Config.WIDTH - 150, 10, "Score: " + player.getScore(), Color.black);
+		}
+		
+		if(mode == 2) {
+			titles.drawString(
+					Config.WIDTH/2-125, 
+					Config.HEIGHT/2-45, 
+					"New Highscore!", 
+					Color.black
+			);
+			titles.drawString(
+					Config.WIDTH/2-125, 
+					Config.HEIGHT/2-30, 
+					"Please enter your name and cellphone number separated by a space:",
+					Color.black
+			);
+			inputField.render(container, graphics);
 		}
 	}
 	
@@ -207,16 +248,14 @@ public class SpaceImpact extends BasicGame {
 		graphics.setBackground(new Color(224, 247, 250));
 		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, Config.HEIGHT/10);
 		
-		graphics.setColor(Color.black);
-		graphics.drawString("Music: http://www.bensound.com/", 100, Config.HEIGHT-50);
-		
-		if(this.stuck) {
-			graphics.setColor(Color.red);
-			graphics.drawString("Keyboard seems pressed.\nIf not press the arrow keys and the WASD keys...", Config.WIDTH-500, Config.HEIGHT-75);
-		} else {
-			graphics.setColor(Color.black);
-			graphics.drawString("Press enter to start the game...", Config.WIDTH-500, Config.HEIGHT-50);
-		}
+		titles.drawString(100, Config.HEIGHT-70, "Created by: Alliance of Computer Science Students (ACSS)", Color.black);
+		titles.drawString(100, Config.HEIGHT-50, "Music: http://www.bensound.com/", Color.black);
+		titles.drawString( 
+				Config.WIDTH-400, 
+				Config.HEIGHT-50,
+				"Press enter to start the game...",
+				Color.black
+		);
 	}
 	
 	public void renderGame(Graphics graphics) {
@@ -224,10 +263,25 @@ public class SpaceImpact extends BasicGame {
 			cloudSprite.draw(c.getX(), c.getY());
 		}
 		
-		switch(direction) {
-			case NEUTRAL: playerSheet.getSubImage(0, 0).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
-			case LEFT: playerSheet.getSubImage(1, 1).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
-			case RIGHT: playerSheet.getSubImage(1, 0).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
+		if(player.isDead()) {
+			titles.drawString(
+					Config.WIDTH/2-50,
+					Config.HEIGHT*0.60f,
+					"GAME OVER!",
+					Color.red
+			);
+		} else {
+			switch(direction) {
+				case NEUTRAL: playerSheet.getSubImage(0, 0).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
+				case LEFT: playerSheet.getSubImage(1, 1).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
+				case RIGHT: playerSheet.getSubImage(1, 0).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
+			}
+		}
+		
+		if(!player.getFired() && !player.isDead()) {
+			indicators.drawString(
+					player.getX()+1, player.getY()+Player.HEIGHT+5, "READY!", Color.black
+			);
 		}
 		
 		try {
