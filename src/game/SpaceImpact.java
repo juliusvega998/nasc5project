@@ -226,7 +226,7 @@ public class SpaceImpact extends BasicGame {
 	
 	public void reset() {
 		this.player.reset();
-		this.level = 1;
+		this.level = 0;
 		this.mode = 0;
 		
 		Enemy.reset();
