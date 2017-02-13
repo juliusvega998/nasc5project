@@ -3,8 +3,16 @@ package model;
 import model.enemy.Enemy;
 
 public class BulletEnemy extends Bullet {
+	private int type;
+	
 	public BulletEnemy(Enemy e) {
 		super(e.getX() + (Enemy.WIDTH-Bullet.WIDTH)/2, e.getY());
+		this.type = 0;
+	}
+	
+	public BulletEnemy(Enemy e, int type) {
+		super(e.getX() + (Enemy.WIDTH-Bullet.WIDTH)/2, e.getY());
+		this.type = type;
 	}
 
 	@Override
@@ -22,6 +30,11 @@ public class BulletEnemy extends Bullet {
 						}
 						
 						BulletEnemy.this.setY(BulletEnemy.this.getY() + increment);
+						if(type == 1) {
+							BulletEnemy.this.setX(BulletEnemy.this.getX() + increment);
+						} else if(type == 2) {
+							BulletEnemy.this.setX(BulletEnemy.this.getX() - increment);
+						}
 						increment += SPEED;
 						Thread.sleep(Bullet.TIME);
 					}
@@ -29,7 +42,9 @@ public class BulletEnemy extends Bullet {
 					Thread.currentThread().interrupt();
 				}
 				
-				Bullet.BULLETS.remove(BulletEnemy.this);
+				try {
+					Bullet.BULLETS.remove(BulletEnemy.this);
+				} catch(Exception e) {}
 			}
 		};
 		

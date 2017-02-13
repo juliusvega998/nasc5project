@@ -50,9 +50,11 @@ public class BulletPlayer extends Bullet {
 		try{
 			for(int i=0; i<Enemy.ENEMIES.size(); i++) {
 				if(this.boundingRect().intersects(Enemy.ENEMIES.get(i).boundingRect())) {
-					Enemy.ENEMIES.get(i).interrupt();
 					Enemy.ENEMIES.get(i).playDead();
-					Enemy.ENEMIES.remove(Enemy.ENEMIES.get(i));
+					if(Enemy.ENEMIES.get(i).isDead()) {
+						Enemy.ENEMIES.get(i).interrupt();
+						Enemy.ENEMIES.remove(Enemy.ENEMIES.get(i));
+					}
 					
 					return true;
 				}

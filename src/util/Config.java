@@ -1,5 +1,7 @@
 package util;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,10 +9,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 public class Config {
+	private static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	
 	public static final boolean DEBUG = false;
 	
-	public static final int WIDTH = 1344;
-	public static final int HEIGHT = 756;
+	public static final int WIDTH = (int) screenSize.getWidth();
+	public static final int HEIGHT = (int) screenSize.getHeight();
 	
 	public static int getScore() {
 		try {

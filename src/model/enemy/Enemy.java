@@ -18,6 +18,8 @@ public class Enemy extends Entity {
 	public static final int HEIGHT = 25;
 	public static final float SPEED = 1;
 	
+	protected int life;
+	
 	protected Random rand;
 	
 	protected Thread move;
@@ -32,6 +34,18 @@ public class Enemy extends Entity {
 		rand = new Random();
 		this.hurt = hurt;
 		this.shoot = shoot;
+		this.life = 1;
+		ENEMIES.add(this);
+		start();
+	}
+	
+	public Enemy(float x, float y, int life, Sound hurt, Sound shoot) {
+		super(x, y);
+		
+		rand = new Random();
+		this.hurt = hurt;
+		this.shoot = shoot;
+		this.life = life;
 		ENEMIES.add(this);
 		start();
 	}
@@ -97,7 +111,16 @@ public class Enemy extends Entity {
 	}
 	
 	public void playDead() {
+		this.life--;
 		this.hurt.play();
+	}
+	
+	public int getLife() {
+		return this.life;
+	}
+	
+	public boolean isDead() {
+		return this.life < 1;
 	}
 	
 	public Rectangle boundingRect() {

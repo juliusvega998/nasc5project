@@ -53,15 +53,18 @@ public class EnemyFast extends Enemy {
 			public void run() {
 				try{
 					while(!this.isInterrupted()) {
-						new BulletEnemy(EnemyFast.this);
-						shoot.play();
-						Thread.sleep(rand.nextInt(900) + 100);
+						if(EnemyFast.this.getX() >= Player.getInstance().getX() 
+								&&EnemyFast.this.getX() <= Player.getInstance().getX() + Player.WIDTH - SPEED) {
+							new BulletEnemy(EnemyFast.this);
+							shoot.play();
+							Thread.sleep(100);
+						}
 					}
 				} catch(InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 			}
-		};
+		}; 
 		
 		move.start();
 		fire.start();

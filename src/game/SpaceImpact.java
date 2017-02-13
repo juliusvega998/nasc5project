@@ -3,8 +3,6 @@ package game;
 import java.awt.Font;
 import java.util.Random;
 
-import javax.swing.JOptionPane;
-
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.Color;
@@ -46,6 +44,7 @@ public class SpaceImpact extends BasicGame {
 	
 	private Image cloudSprite;
 	private Image logo;
+	private Image start;
 	
 	private Sound cupidFire;
 	private Sound enemyFire;
@@ -58,6 +57,9 @@ public class SpaceImpact extends BasicGame {
 	private int mode;
 	private int highscore;
 	private int direction;
+	
+	private boolean show;
+	
 	private Random rand;
 	
 	private TrueTypeFont titles;
@@ -72,9 +74,10 @@ public class SpaceImpact extends BasicGame {
 	@Override
 	public void init(GameContainer container) throws SlickException {
 		this.mode = 0;
-		this.level = 1;
+		this.level = 0;
 		this.highscore = Config.getScore();
 		this.direction = NEUTRAL;
+		this.show = true;
 		this.rand = new Random();
 		
 		this.playerSheet = new SpriteSheet("resources/img/cupid2.png", 300, 300);
@@ -93,6 +96,7 @@ public class SpaceImpact extends BasicGame {
 		this.pBulletSheet = new Image("resources/img/cuArrow.png");
 		this.cloudSprite = new Image("resources/img/cloud.png");
 		this.logo = new Image("resources/img/logo.png");
+		this.start = new Image("resources/img/start.png");
 		
 		this.clouds = new Cloud[CLOUD_NO];
 		for(int i=0; i<CLOUD_NO; i++) {
@@ -103,6 +107,18 @@ public class SpaceImpact extends BasicGame {
 		this.indicators = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10), true);
 		
 		this.inputField = new TextField(container, titles, Config.WIDTH/2-125, Config.HEIGHT/2-10, 250, 20);
+		
+		new Thread() {
+			@Override
+			public void run() {
+				while(true) {
+					try {
+						show = !show;
+						Thread.sleep(500);
+					} catch(Exception e) {}
+				}
+			}
+		}.start();
 	}
 
 	@Override
@@ -125,7 +141,7 @@ public class SpaceImpact extends BasicGame {
 			this.player.moveUp();
 		}
 		
-		if(input.isKeyPressed(Input.KEY_SPACE) && this.mode < 2) {
+		if(input.isKeyDown(Input.KEY_SPACE) && this.mode < 2) {
 			this.player.fire();
 		}
 		
@@ -134,11 +150,12 @@ public class SpaceImpact extends BasicGame {
 				this.mode = 1;
 				this.music.loop();
 				this.player.reset();
-			} else if(input.isKeyPressed(Input.KEY_ESCAPE)) {
+			} else if(input.isKeyDown(Input.KEY_ESCAPE)) {
 				System.exit(0);
 			}
 		} else if(mode == 1) {
 			if(Enemy.ENEMIES.size() == 0) {
+				level++;
 				for(int i=0; i<level; i++) {
 					new Enemy(
 							rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, 
@@ -165,7 +182,6 @@ public class SpaceImpact extends BasicGame {
 							this.enemyFire
 					);
 				}
-				level++;
 			}
 			
 			if(player.isDead()) {
@@ -223,11 +239,7 @@ public class SpaceImpact extends BasicGame {
 		if(mode == 0) {
 			renderMenu(graphics);
 			titles.drawString(Config.WIDTH - 150, 10, "High Score: " + this.highscore, Color.black);
-		} else {
-			titles.drawString(Config.WIDTH - 150, 10, "Score: " + player.getScore(), Color.black);
-		}
-		
-		if(mode == 2) {
+		} else if(mode == 2) {
 			titles.drawString(
 					Config.WIDTH/2-125, 
 					Config.HEIGHT/2-45, 
@@ -241,7 +253,12 @@ public class SpaceImpact extends BasicGame {
 					Color.black
 			);
 			inputField.render(container, graphics);
+		} else {
+			titles.drawString(Config.WIDTH - 150, 10, "Score: " + player.getScore(), Color.black);
+			titles.drawString(Config.WIDTH * 3/4, 10, "Level: " + level, Color.black);
 		}
+		
+		
 	}
 	
 	public void renderMenu(Graphics graphics) {
@@ -250,12 +267,9 @@ public class SpaceImpact extends BasicGame {
 		
 		titles.drawString(100, Config.HEIGHT-70, "Created by: Alliance of Computer Science Students (ACSS)", Color.black);
 		titles.drawString(100, Config.HEIGHT-50, "Music: http://www.bensound.com/", Color.black);
-		titles.drawString( 
-				Config.WIDTH-400, 
-				Config.HEIGHT-50,
-				"Press enter to start the game...",
-				Color.black
-		);
+		if(show) {
+			start.draw(Config.WIDTH/2-62, Config.HEIGHT/2-12);
+		}
 	}
 	
 	public void renderGame(Graphics graphics) {
@@ -286,20 +300,38 @@ public class SpaceImpact extends BasicGame {
 		
 		try {
 			for(int i=0; i<Bullet.BULLETS.size(); i++) {
-				if(Bullet.BULLETS.get(i) instanceof BulletPlayer) {
-					pBulletSheet.draw(Bullet.BULLETS.get(i).getX(), Bullet.BULLETS.get(i).getY(), Bullet.WIDTH, Bullet.HEIGHT);
-				} else {
-					eBulletSprite.draw(Bullet.BULLETS.get(i).getX(), Bullet.BULLETS.get(i).getY(), Bullet.WIDTH, Bullet.HEIGHT);
-				}
+				try {
+					Bullet b = Bullet.BULLETS.get(i); 
+					if(b instanceof BulletPlayer) {
+						pBulletSheet.draw(b.getX(), b.getY(), Bullet.WIDTH, Bullet.HEIGHT);
+					} else {
+						eBulletSprite.draw(b.getX(), b.getY(), Bullet.WIDTH, Bullet.HEIGHT);
+					}
+				} catch(Exception e) {}
 			}
 			
 			for(int i=0; i<Enemy.ENEMIES.size(); i++) {
-				if(Enemy.ENEMIES.get(i) instanceof EnemyStrong) {
-					enemySheet.draw(Enemy.ENEMIES.get(i).getX(), Enemy.ENEMIES.get(i).getY(), EnemyStrong.WIDTH, EnemyStrong.HEIGHT);
-				} else {
-					enemySheet.draw(Enemy.ENEMIES.get(i).getX(), Enemy.ENEMIES.get(i).getY(), Enemy.WIDTH, Enemy.HEIGHT);
-				}
+				try {
+					Enemy e = Enemy.ENEMIES.get(i);
+					
+					graphics.setColor(Color.green);
+					if(e instanceof EnemyStrong) {
+						if(e.getLife() == 1) {
+							graphics.setColor(Color.red);
+						}
+						graphics.fillRect(e.getX(), e.getY() - 10, EnemyStrong.WIDTH * e.getLife()/5, 5);
+						enemySheet.draw(e.getX(), e.getY(), EnemyStrong.WIDTH, EnemyStrong.HEIGHT);
+					} else if (e instanceof EnemyFast) {
+						graphics.fillRect(e.getX(), e.getY() - 10, EnemyFast.WIDTH, 5);
+						enemySheet.draw(e.getX(), e.getY(), EnemyFast.WIDTH, EnemyFast.HEIGHT);
+					} else {
+						graphics.fillRect(e.getX(), e.getY() - 10, Enemy.WIDTH, 5);
+						enemySheet.draw(e.getX(), e.getY(), Enemy.WIDTH, Enemy.HEIGHT);
+					}
+					
+				} catch(Exception e) {}
 			}
+			graphics.setColor(Color.black);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

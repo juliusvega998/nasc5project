@@ -13,7 +13,7 @@ public class EnemyStrong extends Enemy {
 	public static final int HEIGHT = 40;
 
 	public EnemyStrong(float x, float y, Sound hurt, Sound shoot) {
-		super(x, y, hurt, shoot);
+		super(x, y, 5, hurt, shoot);
 	}
 	
 	@Override
@@ -51,10 +51,12 @@ public class EnemyStrong extends Enemy {
 			public void run() {
 				try{
 					while(!this.isInterrupted()) {
-						for(int i=0; i<5 && !this.isInterrupted(); i++) {
-							new BulletEnemy(EnemyStrong.this);
+						for(int i=0; i<3 && !this.isInterrupted(); i++) {
+							new BulletEnemy(EnemyStrong.this, 0);
+							new BulletEnemy(EnemyStrong.this, 1);
+							new BulletEnemy(EnemyStrong.this, 2);
 							shoot.play();
-							Thread.sleep(200);
+							Thread.sleep(300);
 						}
 						Thread.sleep(rand.nextInt(200) + 900);
 					}
