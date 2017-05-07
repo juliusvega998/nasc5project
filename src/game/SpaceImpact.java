@@ -17,9 +17,10 @@ import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.gui.TextField;
 
-import model.Bullet;
-import model.BulletPlayer;
+import model.bullet.Bullet;
+import model.bullet.BulletPlayer;
 import model.Cloud;
+import model.Forest;
 import model.Player;
 import model.enemy.Enemy;
 import model.enemy.EnemyFast;
@@ -34,7 +35,7 @@ public class SpaceImpact extends BasicGame {
 	public static final int CLOUD_NO = 3;
 	
 	private Player player;
-	private Cloud[] clouds;
+	private Forest forest;
 	
 	private SpriteSheet playerSheet;
 	private Image pBulletSheet;
@@ -91,17 +92,13 @@ public class SpaceImpact extends BasicGame {
 		this.music = new Music("resources/sound/music.ogg");
 		
 		this.player = Player.getInstance(cupidFire, cupidDead);
+		this.forest = Forest.getInstance();
 		
 		this.eBulletSprite = new Image("resources/img/enemy_bullet.png");
 		this.pBulletSheet = new Image("resources/img/cuArrow.png");
 		this.cloudSprite = new Image("resources/img/cloud.png");
 		this.logo = new Image("resources/img/logo.png");
 		this.start = new Image("resources/img/start.png");
-		
-		this.clouds = new Cloud[CLOUD_NO];
-		for(int i=0; i<CLOUD_NO; i++) {
-			this.clouds[i] = new Cloud(rand.nextInt(Config.WIDTH/2)+Config.WIDTH/4, rand.nextInt((Config.HEIGHT-100)/2)+100);
-		}
 		
 		this.titles = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14), true);
 		this.indicators = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10), true);
@@ -158,33 +155,33 @@ public class SpaceImpact extends BasicGame {
 				level++;
 				for(int i=0; i<level; i++) {
 					new Enemy(
-							rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, 
-							rand.nextInt(200) + 50, 
+							rand.nextInt(Config.WIDTH-2*Enemy.WIDTH) + Enemy.WIDTH, 
+							Enemy.HEIGHT*-1-i, 
 							this.enemyHurt, 
 							this.enemyFire
 					);
-				}
-				
-				for(int i=0; i<level/5; i++) {
-					new EnemyStrong(
-							rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, 
-							rand.nextInt(200) + 50, 
-							this.enemyHurt, 
-							this.enemyFire
-					);
-				}
-				
-				for(int i=0; i<level/3; i++) {
-					new EnemyFast(
-							rand.nextInt(Config.WIDTH+Enemy.WIDTH)-Enemy.WIDTH, 
-							rand.nextInt(200) + 50, 
-							this.enemyHurt, 
-							this.enemyFire
-					);
+					
+					if(i%3 == 0 && i != 0) {
+						new EnemyFast(
+								rand.nextInt(Config.WIDTH-2*EnemyFast.WIDTH) + EnemyFast.WIDTH, 
+								EnemyFast.HEIGHT*-1-i-i/3, 
+								this.enemyHurt, 
+								this.enemyFire
+						);
+					}
+					
+					if(i%5 == 0 && i != 0) {
+						new EnemyStrong(
+								rand.nextInt(Config.WIDTH-2*EnemyStrong.WIDTH) + EnemyStrong.WIDTH, 
+								EnemyStrong.HEIGHT*-1-i-i/5, 
+								this.enemyHurt, 
+								this.enemyFire
+						);
+					}
 				}
 			}
 			
-			if(player.isDead()) {
+			if(player.isDead() || !forest.isAlive()) {
 				this.music.pause();
 				
 				if(highscore >= this.player.getScore()) {
@@ -226,6 +223,7 @@ public class SpaceImpact extends BasicGame {
 	
 	public void reset() {
 		this.player.reset();
+		this.forest.reset();
 		this.level = 0;
 		this.mode = 0;
 		
@@ -254,7 +252,7 @@ public class SpaceImpact extends BasicGame {
 			);
 			inputField.render(container, graphics);
 		} else {
-			titles.drawString(Config.WIDTH - 150, 10, "Score: " + player.getScore(), Color.black);
+			titles.drawString(Config.WIDTH - 125, 10, "Score: " + player.getScore(), Color.black);
 			titles.drawString(Config.WIDTH * 3/4, 10, "Level: " + level, Color.black);
 		}
 		
@@ -265,19 +263,14 @@ public class SpaceImpact extends BasicGame {
 		graphics.setBackground(new Color(224, 247, 250));
 		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, Config.HEIGHT/10);
 		
-		titles.drawString(100, Config.HEIGHT-70, "Created by: Alliance of Computer Science Students (ACSS)", Color.black);
 		titles.drawString(100, Config.HEIGHT-50, "Music: http://www.bensound.com/", Color.black);
 		if(show) {
-			start.draw(Config.WIDTH/2-62, Config.HEIGHT/2-12);
+			start.draw(Config.WIDTH/2-62, Config.HEIGHT/4*3-12);
 		}
 	}
 	
 	public void renderGame(Graphics graphics) {
-		for(Cloud c : clouds) {
-			cloudSprite.draw(c.getX(), c.getY());
-		}
-		
-		if(player.isDead()) {
+		if(player.isDead()  || !forest.isAlive()) {
 			titles.drawString(
 					Config.WIDTH/2-50,
 					Config.HEIGHT*0.60f,
@@ -331,6 +324,11 @@ public class SpaceImpact extends BasicGame {
 					
 				} catch(Exception e) {}
 			}
+			
+			if(forest.isAlive()) {
+				graphics.draw(forest.boundingRect());
+			}
+			
 			graphics.setColor(Color.black);
 		} catch(Exception e) {
 			e.printStackTrace();

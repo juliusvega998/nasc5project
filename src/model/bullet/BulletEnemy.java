@@ -1,5 +1,6 @@
-package model;
+package model.bullet;
 
+import model.Player;
 import model.enemy.Enemy;
 
 public class BulletEnemy extends Bullet {

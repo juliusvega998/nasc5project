@@ -3,7 +3,8 @@ package model.enemy;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Rectangle;
 
-import model.BulletEnemy;
+import model.bullet.BulletEnemy;
+import model.Forest;
 import model.Player;
 import util.Config;
 
@@ -11,7 +12,7 @@ public class EnemyFast extends Enemy {
 
 	public static final int WIDTH = 15;
 	public static final int HEIGHT = 15;
-	public static final float SPEED = 5;
+	public static final float SPEED = 1;
 	
 	public EnemyFast(float x, float y, Sound hurt, Sound shoot) {
 		super(x, y, hurt, shoot);
@@ -23,21 +24,22 @@ public class EnemyFast extends Enemy {
 		move = new Thread() {
 			@Override
 			public void run() {
-				boolean moveLeft = rand.nextBoolean();
 				try{
 					while(!this.isInterrupted()) {
-						if(moveLeft) {
-							EnemyFast.this.setX(EnemyFast.this.getX() - SPEED);
-						} else {
-							EnemyFast.this.setX(EnemyFast.this.getX() + SPEED);
-						}
+						EnemyFast.this.setY(EnemyFast.this.getY() + SPEED);
 						
-						if(EnemyFast.this.getX() < 10) {
-							moveLeft = false;
-						} else if(EnemyFast.this.getX() > Config.WIDTH - 10) {
-							moveLeft = true;
-						} else if(EnemyFast.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
+						if(EnemyFast.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
 							Player.getInstance().kill();
+							EnemyFast.this.kill();
+						} else if(EnemyFast.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
+							Forest.getInstance().damage(5);
+							EnemyFast.this.kill();
+							Enemy.ENEMIES.remove(EnemyFast.this);
+							break;
+						} else if(EnemyFast.this.getY() >= Config.HEIGHT) {
+							EnemyFast.this.kill();
+							Enemy.ENEMIES.remove(EnemyFast.this);
+							break;
 						}
 						
 						Thread.sleep(10);
@@ -48,26 +50,7 @@ public class EnemyFast extends Enemy {
 			}
 		};
 		
-		fire = new Thread() {
-			@Override
-			public void run() {
-				try{
-					while(!this.isInterrupted()) {
-						if(EnemyFast.this.getX() >= Player.getInstance().getX() 
-								&&EnemyFast.this.getX() <= Player.getInstance().getX() + Player.WIDTH - SPEED) {
-							new BulletEnemy(EnemyFast.this);
-							shoot.play();
-							Thread.sleep(100);
-						}
-					}
-				} catch(InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		}; 
-		
 		move.start();
-		fire.start();
 	}
 	
 	@Override

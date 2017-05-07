@@ -3,6 +3,7 @@ package model;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Rectangle;
 
+import model.bullet.BulletPlayer;
 import util.Config;
 
 public class Player extends Entity {

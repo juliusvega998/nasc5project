@@ -12,7 +12,7 @@ public class Main {
 		
 		try {
 			app = new AppGameContainer(new SpaceImpact("Nature Protector"));
-			app.setDisplayMode(Config.WIDTH, Config.HEIGHT, true);
+			app.setDisplayMode(Config.WIDTH, Config.HEIGHT, false);
 			app.setTargetFrameRate(60); //cap FPS to 60
 			app.setShowFPS(Config.DEBUG);
 			app.setAlwaysRender(true);

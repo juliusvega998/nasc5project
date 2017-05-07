@@ -6,8 +6,9 @@ import java.util.Random;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Rectangle;
 
-import model.BulletEnemy;
+import model.bullet.BulletEnemy;
 import model.Entity;
+import model.Forest;
 import model.Player;
 import util.Config;
 
@@ -16,14 +17,13 @@ public class Enemy extends Entity {
 	
 	public static final int WIDTH = 25;
 	public static final int HEIGHT = 25;
-	public static final float SPEED = 1;
+	public static final float SPEED = 0.5f;
 	
 	protected int life;
 	
 	protected Random rand;
 	
 	protected Thread move;
-	protected Thread fire;
 	
 	private Sound hurt;
 	protected Sound shoot;
@@ -54,21 +54,22 @@ public class Enemy extends Entity {
 		move = new Thread() {
 			@Override
 			public void run() {
-				boolean moveLeft = rand.nextBoolean();
 				try{
 					while(!this.isInterrupted()) {
-						if(moveLeft) {
-							Enemy.this.setX(Enemy.this.getX() - SPEED);
-						} else {
-							Enemy.this.setX(Enemy.this.getX() + SPEED);
-						}
+						Enemy.this.setY(Enemy.this.getY() + SPEED);
 						
-						if(Enemy.this.getX() < 10) {
-							moveLeft = false;
-						} else if(Enemy.this.getX() > Config.WIDTH - 10) {
-							moveLeft = true;
-						} else if(Enemy.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
+						if(Enemy.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
 							Player.getInstance().kill();
+							Enemy.this.kill();
+						} else if(Enemy.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
+							Forest.getInstance().damage(10);
+							Enemy.this.kill();
+							Enemy.ENEMIES.remove(Enemy.this);
+							break;
+						} else if(Enemy.this.getY() >= Config.HEIGHT) {
+							Enemy.this.kill();
+							Enemy.ENEMIES.remove(Enemy.this);
+							break;
 						}
 						
 						Thread.sleep(10);
@@ -79,28 +80,11 @@ public class Enemy extends Entity {
 			}
 		};
 		
-		fire = new Thread() {
-			@Override
-			public void run() {
-				try{
-					while(!this.isInterrupted()) {
-						new BulletEnemy(Enemy.this);
-						shoot.play();
-						Thread.sleep(rand.nextInt(200) + 900);
-					}
-				} catch(InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		};
-		
 		move.start();
-		fire.start();
 	}
 	
 	public void interrupt() {
 		move.interrupt();
-		fire.interrupt();
 	}
 	
 	public static void reset() {
@@ -117,6 +101,10 @@ public class Enemy extends Entity {
 	
 	public int getLife() {
 		return this.life;
+	}
+	
+	public void kill() {
+		this.life = 0;
 	}
 	
 	public boolean isDead() {

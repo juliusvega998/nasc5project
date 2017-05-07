@@ -3,7 +3,7 @@ package model.enemy;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Rectangle;
 
-import model.BulletEnemy;
+import model.Forest;
 import model.Player;
 import util.Config;
 
@@ -11,6 +11,8 @@ public class EnemyStrong extends Enemy {
 	
 	public static final int WIDTH = 40;
 	public static final int HEIGHT = 40;
+	
+	public static final float SPEED = 0.25f;
 
 	public EnemyStrong(float x, float y, Sound hurt, Sound shoot) {
 		super(x, y, 5, hurt, shoot);
@@ -21,21 +23,22 @@ public class EnemyStrong extends Enemy {
 		move = new Thread() {
 			@Override
 			public void run() {
-				boolean moveLeft = rand.nextBoolean();
 				try{
 					while(!this.isInterrupted()) {
-						if(moveLeft) {
-							EnemyStrong.this.setX(EnemyStrong.this.getX() - SPEED);
-						} else {
-							EnemyStrong.this.setX(EnemyStrong.this.getX() + SPEED);
-						}
+						EnemyStrong.this.setY(EnemyStrong.this.getY() + SPEED);
 						
-						if(EnemyStrong.this.getX() < 10) {
-							moveLeft = false;
-						} else if(EnemyStrong.this.getX() > Config.WIDTH - 10) {
-							moveLeft = true;
-						} else if(EnemyStrong.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
+						if(EnemyStrong.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
 							Player.getInstance().kill();
+							EnemyStrong.this.kill();
+						} else if(EnemyStrong.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
+							Forest.getInstance().damage(20);
+							EnemyStrong.this.kill();
+							Enemy.ENEMIES.remove(EnemyStrong.this);
+							break;
+						} else if(EnemyStrong.this.getY() >= Config.HEIGHT) {
+							EnemyStrong.this.kill();
+							Enemy.ENEMIES.remove(EnemyStrong.this);
+							break;
 						}
 						
 						Thread.sleep(10);
@@ -46,28 +49,7 @@ public class EnemyStrong extends Enemy {
 			}
 		};
 		
-		fire = new Thread() {
-			@Override
-			public void run() {
-				try{
-					while(!this.isInterrupted()) {
-						for(int i=0; i<3 && !this.isInterrupted(); i++) {
-							new BulletEnemy(EnemyStrong.this, 0);
-							new BulletEnemy(EnemyStrong.this, 1);
-							new BulletEnemy(EnemyStrong.this, 2);
-							shoot.play();
-							Thread.sleep(300);
-						}
-						Thread.sleep(rand.nextInt(200) + 900);
-					}
-				} catch(InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		};
-		
 		move.start();
-		fire.start();
 	}
 	
 	@Override

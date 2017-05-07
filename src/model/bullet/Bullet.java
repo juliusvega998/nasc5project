@@ -1,8 +1,10 @@
-package model;
+package model.bullet;
 
 import java.util.ArrayList;
 
 import org.newdawn.slick.geom.Rectangle;
+
+import model.Entity;
 
 public abstract class Bullet extends Entity {
 	public static final ArrayList<Bullet> BULLETS = new ArrayList<>();
