@@ -11,7 +11,7 @@ public class Main {
 		AppGameContainer app;
 		
 		try {
-			app = new AppGameContainer(new SpaceImpact("Where do broken hearts go?"));
+			app = new AppGameContainer(new SpaceImpact("Nature Protector"));
 			app.setDisplayMode(Config.WIDTH, Config.HEIGHT, true);
 			app.setTargetFrameRate(60); //cap FPS to 60
 			app.setShowFPS(Config.DEBUG);
