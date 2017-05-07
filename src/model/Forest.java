@@ -6,7 +6,7 @@ import util.Config;
 
 public class Forest extends Entity implements Runnable {
 	public static final int WIDTH = Config.WIDTH;
-	public static final int HEIGHT = 100;
+	public static final int HEIGHT = WIDTH/8;
 	public static final int MAX_LIFE = 100;
 	
 	private static final Forest instance = new Forest();

@@ -9,9 +9,6 @@ import model.Player;
 import util.Config;
 
 public class EnemyFast extends Enemy {
-
-	public static final int WIDTH = 15;
-	public static final int HEIGHT = 15;
 	public static final float SPEED = 1;
 	
 	public EnemyFast(float x, float y, Sound hurt, Sound shoot) {
@@ -28,11 +25,8 @@ public class EnemyFast extends Enemy {
 					while(!this.isInterrupted()) {
 						EnemyFast.this.setY(EnemyFast.this.getY() + SPEED);
 						
-						if(EnemyFast.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
-							Player.getInstance().kill();
-							EnemyFast.this.kill();
-						} else if(EnemyFast.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
-							Forest.getInstance().damage(5);
+						if(EnemyFast.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
+							Forest.getInstance().damage(15);
 							EnemyFast.this.kill();
 							Enemy.ENEMIES.remove(EnemyFast.this);
 							break;

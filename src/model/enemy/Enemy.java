@@ -58,10 +58,7 @@ public class Enemy extends Entity {
 					while(!this.isInterrupted()) {
 						Enemy.this.setY(Enemy.this.getY() + SPEED);
 						
-						if(Enemy.this.boundingRect().intersects(Player.getInstance().boundingRect())) {
-							Player.getInstance().kill();
-							Enemy.this.kill();
-						} else if(Enemy.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
+						if(Enemy.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
 							Forest.getInstance().damage(10);
 							Enemy.this.kill();
 							Enemy.ENEMIES.remove(Enemy.this);

@@ -24,7 +24,6 @@ import model.Forest;
 import model.Player;
 import model.enemy.Enemy;
 import model.enemy.EnemyFast;
-import model.enemy.EnemyStrong;
 import util.Config;
 
 public class SpaceImpact extends BasicGame {
@@ -37,15 +36,16 @@ public class SpaceImpact extends BasicGame {
 	private Player player;
 	private Forest forest;
 	
-	private SpriteSheet playerSheet;
+	private Animation playerSheet;
 	private Image pBulletSheet;
 	
-	private Animation enemySheet;
-	private Image eBulletSprite;
+	private Animation enemySheetN;
+	private Animation enemySheetF;
 	
-	private Image cloudSprite;
 	private Image logo;
 	private Image start;
+	
+	private Image forestSprite;
 	
 	private Sound cupidFire;
 	private Sound enemyFire;
@@ -81,8 +81,9 @@ public class SpaceImpact extends BasicGame {
 		this.show = true;
 		this.rand = new Random();
 		
-		this.playerSheet = new SpriteSheet("resources/img/cupid2.png", 300, 300);
-		this.enemySheet = new Animation(new SpriteSheet("resources/img/Enemy.png", 225, 225), 100);
+		this.playerSheet = new Animation(new SpriteSheet("resources/img/planes.png", 100, 100), 250);
+		this.enemySheetN = new Animation(new SpriteSheet("resources/img/enemy.png", 100, 100), 150);
+		this.enemySheetF = new Animation(new SpriteSheet("resources/img/enemy2.png", 100, 100), 50);
 		
 		this.cupidFire = new Sound("resources/sound/cupid_shoot.wav");
 		this.enemyFire = new Sound("resources/sound/enemy_shoot.wav");
@@ -94,11 +95,10 @@ public class SpaceImpact extends BasicGame {
 		this.player = Player.getInstance(cupidFire, cupidDead);
 		this.forest = Forest.getInstance();
 		
-		this.eBulletSprite = new Image("resources/img/enemy_bullet.png");
-		this.pBulletSheet = new Image("resources/img/cuArrow.png");
-		this.cloudSprite = new Image("resources/img/cloud.png");
+		this.pBulletSheet = new Image("resources/img/net.png");
 		this.logo = new Image("resources/img/logo.png");
 		this.start = new Image("resources/img/start.png");
+		this.forestSprite = new Image("resources/img/forest.png");
 		
 		this.titles = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14), true);
 		this.indicators = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10), true);
@@ -154,13 +154,6 @@ public class SpaceImpact extends BasicGame {
 			if(Enemy.ENEMIES.size() == 0) {
 				level++;
 				for(int i=0; i<level; i++) {
-					new Enemy(
-							rand.nextInt(Config.WIDTH-2*Enemy.WIDTH) + Enemy.WIDTH, 
-							Enemy.HEIGHT*-1-i, 
-							this.enemyHurt, 
-							this.enemyFire
-					);
-					
 					if(i%3 == 0 && i != 0) {
 						new EnemyFast(
 								rand.nextInt(Config.WIDTH-2*EnemyFast.WIDTH) + EnemyFast.WIDTH, 
@@ -168,12 +161,10 @@ public class SpaceImpact extends BasicGame {
 								this.enemyHurt, 
 								this.enemyFire
 						);
-					}
-					
-					if(i%5 == 0 && i != 0) {
-						new EnemyStrong(
-								rand.nextInt(Config.WIDTH-2*EnemyStrong.WIDTH) + EnemyStrong.WIDTH, 
-								EnemyStrong.HEIGHT*-1-i-i/5, 
+					} else {
+						new Enemy(
+								rand.nextInt(Config.WIDTH-2*Enemy.WIDTH) + Enemy.WIDTH, 
+								Enemy.HEIGHT*-1-i, 
 								this.enemyHurt, 
 								this.enemyFire
 						);
@@ -234,6 +225,7 @@ public class SpaceImpact extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics graphics) throws SlickException {
 		renderGame(graphics);
+		
 		if(mode == 0) {
 			renderMenu(graphics);
 			titles.drawString(Config.WIDTH - 150, 10, "High Score: " + this.highscore, Color.black);
@@ -245,13 +237,14 @@ public class SpaceImpact extends BasicGame {
 					Color.black
 			);
 			titles.drawString(
-					Config.WIDTH/2-125, 
+					Config.WIDTH/2-75, 
 					Config.HEIGHT/2-30, 
-					"Please enter your name and cellphone number separated by a space:",
+					"Please enter your name.",
 					Color.black
 			);
 			inputField.render(container, graphics);
 		} else {
+			titles.drawString(10, 10, "Forest Life: " + forest.getLife(), Color.black);
 			titles.drawString(Config.WIDTH - 125, 10, "Score: " + player.getScore(), Color.black);
 			titles.drawString(Config.WIDTH * 3/4, 10, "Level: " + level, Color.black);
 		}
@@ -260,46 +253,28 @@ public class SpaceImpact extends BasicGame {
 	}
 	
 	public void renderMenu(Graphics graphics) {
-		graphics.setBackground(new Color(224, 247, 250));
+		graphics.setBackground(new Color(200, 255, 200));
 		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, Config.HEIGHT/10);
 		
-		titles.drawString(100, Config.HEIGHT-50, "Music: http://www.bensound.com/", Color.black);
+		titles.drawString(50, Config.HEIGHT-50, "Music: http://www.bensound.com/", Color.white);
 		if(show) {
 			start.draw(Config.WIDTH/2-62, Config.HEIGHT/4*3-12);
 		}
 	}
 	
 	public void renderGame(Graphics graphics) {
-		if(player.isDead()  || !forest.isAlive()) {
-			titles.drawString(
-					Config.WIDTH/2-50,
-					Config.HEIGHT*0.60f,
-					"GAME OVER!",
-					Color.red
-			);
-		} else {
-			switch(direction) {
-				case NEUTRAL: playerSheet.getSubImage(0, 0).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
-				case LEFT: playerSheet.getSubImage(1, 1).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
-				case RIGHT: playerSheet.getSubImage(1, 0).draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT); break;
+		if(forest.isAlive()) {
+			forestSprite.draw(forest.getX(), forest.getY(), Forest.WIDTH, Forest.HEIGHT);
+			if(Config.DEBUG) {
+				graphics.draw(forest.boundingRect());
 			}
-		}
-		
-		if(!player.getFired() && !player.isDead()) {
-			indicators.drawString(
-					player.getX()+1, player.getY()+Player.HEIGHT+5, "READY!", Color.black
-			);
 		}
 		
 		try {
 			for(int i=0; i<Bullet.BULLETS.size(); i++) {
 				try {
-					Bullet b = Bullet.BULLETS.get(i); 
-					if(b instanceof BulletPlayer) {
-						pBulletSheet.draw(b.getX(), b.getY(), Bullet.WIDTH, Bullet.HEIGHT);
-					} else {
-						eBulletSprite.draw(b.getX(), b.getY(), Bullet.WIDTH, Bullet.HEIGHT);
-					}
+					Bullet b = Bullet.BULLETS.get(i);
+					pBulletSheet.draw(b.getX(), b.getY(), Bullet.WIDTH, Bullet.HEIGHT);
 				} catch(Exception e) {}
 			}
 			
@@ -308,30 +283,30 @@ public class SpaceImpact extends BasicGame {
 					Enemy e = Enemy.ENEMIES.get(i);
 					
 					graphics.setColor(Color.green);
-					if(e instanceof EnemyStrong) {
-						if(e.getLife() == 1) {
-							graphics.setColor(Color.red);
-						}
-						graphics.fillRect(e.getX(), e.getY() - 10, EnemyStrong.WIDTH * e.getLife()/5, 5);
-						enemySheet.draw(e.getX(), e.getY(), EnemyStrong.WIDTH, EnemyStrong.HEIGHT);
-					} else if (e instanceof EnemyFast) {
+					if (e instanceof EnemyFast) {
 						graphics.fillRect(e.getX(), e.getY() - 10, EnemyFast.WIDTH, 5);
-						enemySheet.draw(e.getX(), e.getY(), EnemyFast.WIDTH, EnemyFast.HEIGHT);
+						enemySheetF.draw(e.getX(), e.getY(), EnemyFast.WIDTH, EnemyFast.HEIGHT);
 					} else {
 						graphics.fillRect(e.getX(), e.getY() - 10, Enemy.WIDTH, 5);
-						enemySheet.draw(e.getX(), e.getY(), Enemy.WIDTH, Enemy.HEIGHT);
+						enemySheetN.draw(e.getX(), e.getY(), Enemy.WIDTH, Enemy.HEIGHT);
 					}
 					
 				} catch(Exception e) {}
 			}
-			
-			if(forest.isAlive()) {
-				graphics.draw(forest.boundingRect());
-			}
-			
 			graphics.setColor(Color.black);
 		} catch(Exception e) {
 			e.printStackTrace();
+		}
+		
+		if(player.isDead()  || !forest.isAlive()) {
+			titles.drawString(
+					Config.WIDTH/2-95,
+					Config.HEIGHT*0.60f,
+					"You failed to protect the forest.",
+					Color.red
+			);
+		} else {
+			playerSheet.draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT);
 		}
 	}
 
