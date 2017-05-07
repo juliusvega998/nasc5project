@@ -46,6 +46,10 @@ public class SpaceImpact extends BasicGame {
 	private Image start;
 	
 	private Image forestSprite;
+	private Image forestFewSprite;
+	private Image forestDeadSprite;
+	
+	private Image dirtRoad;
 	
 	private Sound cupidFire;
 	private Sound enemyFire;
@@ -98,7 +102,11 @@ public class SpaceImpact extends BasicGame {
 		this.pBulletSheet = new Image("resources/img/net.png");
 		this.logo = new Image("resources/img/logo.png");
 		this.start = new Image("resources/img/start.png");
+		this.dirtRoad = new Image("resources/img/dirtroad.png");
+		
 		this.forestSprite = new Image("resources/img/forest.png");
+		this.forestFewSprite = new Image("resources/img/forest-few.png");
+		this.forestDeadSprite = new Image("resources/img/forest-dead.png");
 		
 		this.titles = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14), true);
 		this.indicators = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10), true);
@@ -224,6 +232,9 @@ public class SpaceImpact extends BasicGame {
 	
 	@Override
 	public void render(GameContainer container, Graphics graphics) throws SlickException {
+		graphics.setBackground(new Color(200, 255, 200));
+		dirtRoad.draw(Config.WIDTH/2-136, -10);
+		
 		renderGame(graphics);
 		
 		if(mode == 0) {
@@ -253,21 +264,25 @@ public class SpaceImpact extends BasicGame {
 	}
 	
 	public void renderMenu(Graphics graphics) {
-		graphics.setBackground(new Color(200, 255, 200));
 		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, Config.HEIGHT/10);
 		
-		titles.drawString(50, Config.HEIGHT-50, "Music: http://www.bensound.com/", Color.white);
+		titles.drawString(10, 10, "Music: http://www.bensound.com/", Color.black);
 		if(show) {
 			start.draw(Config.WIDTH/2-62, Config.HEIGHT/4*3-12);
 		}
 	}
 	
 	public void renderGame(Graphics graphics) {
-		if(forest.isAlive()) {
-			forestSprite.draw(forest.getX(), forest.getY(), Forest.WIDTH, Forest.HEIGHT);
-			if(Config.DEBUG) {
-				graphics.draw(forest.boundingRect());
-			}
+		if(forest.getLife() > 30) {
+			forestSprite.draw(forest.getX(), forest.getY(), Forest.WIDTH, Forest.HEIGHT);	
+		} else if(forest.isAlive()) {
+			forestFewSprite.draw(forest.getX(), forest.getY(), Forest.WIDTH, Forest.HEIGHT);
+		} else {
+			forestDeadSprite.draw(forest.getX(), forest.getY(), Forest.WIDTH, Forest.HEIGHT);
+		}
+		
+		if(Config.DEBUG) {
+			graphics.draw(forest.boundingRect());
 		}
 		
 		try {
