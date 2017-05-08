@@ -18,21 +18,14 @@ import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.gui.TextField;
 
 import model.bullet.Bullet;
-import model.bullet.BulletPlayer;
-import model.Cloud;
 import model.Forest;
 import model.Player;
 import model.enemy.Enemy;
 import model.enemy.EnemyFast;
+import model.powerup.Powerup;
 import util.Config;
 
-public class SpaceImpact extends BasicGame {
-	public static final int NEUTRAL = 0;
-	public static final int LEFT = 1;
-	public static final int RIGHT = 2;
-	
-	public static final int CLOUD_NO = 3;
-	
+public class SpaceImpact extends BasicGame {	
 	private Player player;
 	private Forest forest;
 	
@@ -61,14 +54,12 @@ public class SpaceImpact extends BasicGame {
 	private int level;
 	private int mode;
 	private int highscore;
-	private int direction;
 	
 	private boolean show;
 	
 	private Random rand;
 	
 	private TrueTypeFont titles;
-	private TrueTypeFont indicators;
 	
 	private TextField inputField;
 	
@@ -81,11 +72,10 @@ public class SpaceImpact extends BasicGame {
 		this.mode = 0;
 		this.level = 0;
 		this.highscore = Config.getScore();
-		this.direction = NEUTRAL;
 		this.show = true;
 		this.rand = new Random();
 		
-		this.playerSheet = new Animation(new SpriteSheet("resources/img/planes.png", 100, 100), 250);
+		this.playerSheet = new Animation(new SpriteSheet("resources/img/planes.png", 40, 40), 250);
 		this.enemySheetN = new Animation(new SpriteSheet("resources/img/enemy.png", 100, 100), 150);
 		this.enemySheetF = new Animation(new SpriteSheet("resources/img/enemy2.png", 100, 100), 50);
 		
@@ -109,7 +99,6 @@ public class SpaceImpact extends BasicGame {
 		this.forestDeadSprite = new Image("resources/img/forest-dead.png");
 		
 		this.titles = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14), true);
-		this.indicators = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10), true);
 		
 		this.inputField = new TextField(container, titles, Config.WIDTH/2-125, Config.HEIGHT/2-10, 250, 20);
 		
@@ -132,12 +121,8 @@ public class SpaceImpact extends BasicGame {
 		
 		if(input.isKeyDown(Input.KEY_LEFT) || input.isKeyDown(Input.KEY_A)) {
 			this.player.moveLeft();
-			this.direction = LEFT;
 		} else if(input.isKeyDown(Input.KEY_RIGHT) || input.isKeyDown(Input.KEY_D)) {
 			this.player.moveRight();
-			this.direction = RIGHT;
-		} else {
-			this.direction = NEUTRAL;
 		}
 		
 		if(input.isKeyDown(Input.KEY_DOWN) || input.isKeyDown(Input.KEY_S)) {
@@ -155,6 +140,7 @@ public class SpaceImpact extends BasicGame {
 				this.mode = 1;
 				this.music.loop();
 				this.player.reset();
+				this.forest.start();
 			} else if(input.isKeyDown(Input.KEY_ESCAPE)) {
 				System.exit(0);
 			}
@@ -233,7 +219,7 @@ public class SpaceImpact extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics graphics) throws SlickException {
 		graphics.setBackground(new Color(200, 255, 200));
-		dirtRoad.draw(Config.WIDTH/2-136, -10);
+		dirtRoad.draw(Config.WIDTH/2-38, -5);
 		
 		renderGame(graphics);
 		
@@ -309,6 +295,11 @@ public class SpaceImpact extends BasicGame {
 				} catch(Exception e) {}
 			}
 			graphics.setColor(Color.black);
+			
+			for(int i=0; i<Powerup.POWERUPS.size(); i++) {
+				Powerup p = Powerup.POWERUPS.get(i);
+				graphics.draw(p.boundingRect());
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

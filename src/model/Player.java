@@ -4,6 +4,7 @@ import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Rectangle;
 
 import model.bullet.BulletPlayer;
+import model.powerup.Powerup;
 import util.Config;
 
 public class Player extends Entity {
@@ -15,6 +16,8 @@ public class Player extends Entity {
 	private Sound killed;
 	
 	private int score;
+	private int powerup;
+	
 	private boolean fired;
 	private boolean dead;
 	
@@ -23,6 +26,7 @@ public class Player extends Entity {
 	private Player(Sound fire, Sound killed) {
 		super((Config.WIDTH-Player.WIDTH)/2, (Config.HEIGHT-Player.HEIGHT)*0.75f);
 		this.score = 0;
+		this.powerup = Powerup.DEFAULT;
 		this.fired = false;
 		this.dead = false;
 		
@@ -41,6 +45,8 @@ public class Player extends Entity {
 		if(newPos > 0) {
 			this.setY(newPos);
 		}
+		
+		checkPowerUp();
 	}
 	
 	public void moveDown(){
@@ -48,6 +54,8 @@ public class Player extends Entity {
 		if(newPos + HEIGHT < Config.HEIGHT) {
 			this.setY(newPos);
 		}
+		
+		checkPowerUp();
 	}
 	
 	public void moveLeft(){
@@ -55,6 +63,8 @@ public class Player extends Entity {
 		if(newPos > 0) {
 			this.setX(newPos);
 		}
+		
+		checkPowerUp();
 	}
 	
 	public void moveRight(){
@@ -62,6 +72,36 @@ public class Player extends Entity {
 		if(newPos + HEIGHT < Config.WIDTH) {
 			this.setX(newPos);
 		}
+		
+		checkPowerUp();
+	}
+	
+	public void checkPowerUp() {
+		Powerup temp = null;
+		
+		if(this.powerup == Powerup.DEFAULT) return;
+		
+		for(Powerup p : Powerup.POWERUPS) {
+			if(this.boundingRect().intersects(p.boundingRect())) {
+				this.powerup = p.getPowerup();
+				System.out.println("Powerup: " + this.powerup);
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(10000); //10 seconds
+						} catch(Exception e) {}
+						Player.this.powerup = Powerup.DEFAULT;
+						System.out.println("Powerup Expired.");
+					}
+				}.start();
+				
+				temp = p;
+				break;
+			}
+		}
+		
+		if(temp != null) Powerup.POWERUPS.remove(temp);
 	}
 	
 	public void fire() {
@@ -107,7 +147,7 @@ public class Player extends Entity {
 	}
 	
 	public Rectangle boundingRect() {
-		return new Rectangle(this.getX(), this.getY(), Player.WIDTH, Player.HEIGHT);
+		return new Rectangle(this.getX(), this.getY(), WIDTH, HEIGHT);
 	}
 	
 	public static Player getInstance(Sound fire, Sound killed) {

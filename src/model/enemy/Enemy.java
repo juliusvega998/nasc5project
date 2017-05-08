@@ -6,11 +6,7 @@ import java.util.Random;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Rectangle;
 
-import model.bullet.BulletEnemy;
 import model.Entity;
-import model.Forest;
-import model.Player;
-import util.Config;
 
 public class Enemy extends Entity {
 	public static final ArrayList<Enemy> ENEMIES = new ArrayList<>();
@@ -23,7 +19,7 @@ public class Enemy extends Entity {
 	
 	protected Random rand;
 	
-	protected Thread move;
+	protected EnemyMovementThread move;
 	
 	private Sound hurt;
 	protected Sound shoot;
@@ -35,8 +31,10 @@ public class Enemy extends Entity {
 		this.hurt = hurt;
 		this.shoot = shoot;
 		this.life = 1;
+		this.move = new EnemyMovementThread(this);
+		
 		ENEMIES.add(this);
-		start();
+		this.move.start();
 	}
 	
 	public Enemy(float x, float y, int life, Sound hurt, Sound shoot) {
@@ -46,38 +44,10 @@ public class Enemy extends Entity {
 		this.hurt = hurt;
 		this.shoot = shoot;
 		this.life = life;
-		ENEMIES.add(this);
-		start();
-	}
-	
-	public void start(){
-		move = new Thread() {
-			@Override
-			public void run() {
-				try{
-					while(!this.isInterrupted()) {
-						Enemy.this.setY(Enemy.this.getY() + SPEED);
-						
-						if(Enemy.this.boundingRect().intersects(Forest.getInstance().boundingRect())) {
-							Forest.getInstance().damage(10);
-							Enemy.this.kill();
-							Enemy.ENEMIES.remove(Enemy.this);
-							break;
-						} else if(Enemy.this.getY() >= Config.HEIGHT) {
-							Enemy.this.kill();
-							Enemy.ENEMIES.remove(Enemy.this);
-							break;
-						}
-						
-						Thread.sleep(10);
-					}
-				} catch(InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		};
+		this.move = new EnemyMovementThread(this);
 		
-		move.start();
+		ENEMIES.add(this);
+		this.move.start();
 	}
 	
 	public void interrupt() {
