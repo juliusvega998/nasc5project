@@ -23,6 +23,7 @@ import model.Player;
 import model.enemy.Enemy;
 import model.enemy.EnemyFast;
 import model.powerup.Powerup;
+import model.powerup.ShieldPowerup;
 import util.Config;
 
 public class SpaceImpact extends BasicGame {	
@@ -39,8 +40,12 @@ public class SpaceImpact extends BasicGame {
 	private Image start;
 	
 	private Image forestSprite;
+	private Image forestShield;
 	private Image forestFewSprite;
 	private Image forestDeadSprite;
+	
+	private Image powerupAmmo;
+	private Image powerupShield;
 	
 	private Image dirtRoad;
 	
@@ -95,8 +100,12 @@ public class SpaceImpact extends BasicGame {
 		this.dirtRoad = new Image("resources/img/dirtroad.png");
 		
 		this.forestSprite = new Image("resources/img/forest.png");
+		this.forestShield = new Image("resources/img/forest-shield.png");
 		this.forestFewSprite = new Image("resources/img/forest-few.png");
 		this.forestDeadSprite = new Image("resources/img/forest-dead.png");
+		
+		this.powerupAmmo = new Image("resources/img/ammo-powerup.png");
+		this.powerupShield = new Image("resources/img/shield-powerup.png");
 		
 		this.titles = new TrueTypeFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14), true);
 		
@@ -140,13 +149,13 @@ public class SpaceImpact extends BasicGame {
 				this.mode = 1;
 				this.music.loop();
 				this.player.reset();
-				this.forest.start();
 			} else if(input.isKeyDown(Input.KEY_ESCAPE)) {
 				System.exit(0);
 			}
 		} else if(mode == 1) {
 			if(Enemy.ENEMIES.size() == 0) {
 				level++;
+				forest.spawnPowerup();
 				for(int i=0; i<level; i++) {
 					if(i%3 == 0 && i != 0) {
 						new EnemyFast(
@@ -214,6 +223,7 @@ public class SpaceImpact extends BasicGame {
 		
 		Enemy.reset();
 		Bullet.reset();
+		Powerup.POWERUPS.clear();
 	}
 	
 	@Override
@@ -267,6 +277,10 @@ public class SpaceImpact extends BasicGame {
 			forestDeadSprite.draw(forest.getX(), forest.getY(), Forest.WIDTH, Forest.HEIGHT);
 		}
 		
+		if(player.getPowerup() == ShieldPowerup.ID) {
+			forestShield.draw(forest.getX(), forest.getY(), Forest.WIDTH, Forest.HEIGHT);
+		}
+		
 		if(Config.DEBUG) {
 			graphics.draw(forest.boundingRect());
 		}
@@ -298,7 +312,11 @@ public class SpaceImpact extends BasicGame {
 			
 			for(int i=0; i<Powerup.POWERUPS.size(); i++) {
 				Powerup p = Powerup.POWERUPS.get(i);
-				graphics.draw(p.boundingRect());
+				if(p instanceof ShieldPowerup) {
+					powerupShield.draw(p.getX(), p.getY(), Powerup.WIDTH, Powerup.HEIGHT);
+				} else {
+					powerupAmmo.draw(p.getX(), p.getY(), Powerup.WIDTH, Powerup.HEIGHT);
+				}
 			}
 		} catch(Exception e) {
 			e.printStackTrace();

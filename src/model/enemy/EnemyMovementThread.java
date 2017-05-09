@@ -1,6 +1,8 @@
 package model.enemy;
 
 import model.Forest;
+import model.Player;
+import model.powerup.ShieldPowerup;
 import util.Config;
 
 public class EnemyMovementThread extends Thread {
@@ -20,7 +22,10 @@ public class EnemyMovementThread extends Thread {
 					e.setY(e.getY() + Enemy.SPEED);
 				
 				if(e.boundingRect().intersects(Forest.getInstance().boundingRect())) {
-					Forest.getInstance().damage(15);
+					if(Player.getInstance().getPowerup() != ShieldPowerup.ID) {
+						Forest.getInstance().damage(15);
+					}
+					
 					e.kill();
 					Enemy.ENEMIES.remove(e);
 					break;

@@ -18,8 +18,6 @@ public class Forest extends Entity {
 	
 	private int life;
 	
-	private Thread givePowers;
-	
 	private Forest() {
 		super(0, Config.HEIGHT - HEIGHT);
 		this.life = MAX_LIFE;
@@ -43,36 +41,21 @@ public class Forest extends Entity {
 	
 	public void reset() {
 		this.life = MAX_LIFE;
-		givePowers.interrupt();
 	}
 
-	public void start() {
-		final Random r = new Random();
-		givePowers = new Thread() {
-			@Override
-			public void run() {
-				while(!this.isInterrupted()) {
-					try {
-						Thread.sleep(10000);
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
-					
-					System.out.println("Powerup spawned!");
-					
-					switch(r.nextInt(2)) {
-					case ShieldPowerup.ID: 
-						new ShieldPowerup(r.nextInt(Config.WIDTH-Powerup.WIDTH), (int) Forest.this.getY()-Powerup.HEIGHT); 
-						break;
-					case UnliAmmoPowerup.ID: 
-						new UnliAmmoPowerup(r.nextInt(Config.WIDTH-Powerup.WIDTH), (int) Forest.this.getY()-Powerup.HEIGHT); 
-						break;
-					}
-				}
-			}
-		};
+	public void spawnPowerup() {
+		Random r = new Random();
 		
-		givePowers.start();
+		if(r.nextInt(100) <= 25) return;
+		
+		switch(r.nextInt(2)) {
+		case ShieldPowerup.ID: 
+			new ShieldPowerup(r.nextInt(Config.WIDTH-Powerup.WIDTH), (int) Forest.this.getY()-Powerup.HEIGHT); 
+			break;
+		case UnliAmmoPowerup.ID: 
+			new UnliAmmoPowerup(r.nextInt(Config.WIDTH-Powerup.WIDTH), (int) Forest.this.getY()-Powerup.HEIGHT); 
+			break;
+		}
 	}
 	
 	public Rectangle boundingRect() {

@@ -5,6 +5,7 @@ import org.newdawn.slick.geom.Rectangle;
 
 import model.bullet.BulletPlayer;
 import model.powerup.Powerup;
+import model.powerup.UnliAmmoPowerup;
 import util.Config;
 
 public class Player extends Entity {
@@ -79,7 +80,7 @@ public class Player extends Entity {
 	public void checkPowerUp() {
 		Powerup temp = null;
 		
-		if(this.powerup == Powerup.DEFAULT) return;
+		if(this.powerup != Powerup.DEFAULT) return;
 		
 		for(Powerup p : Powerup.POWERUPS) {
 			if(this.boundingRect().intersects(p.boundingRect())) {
@@ -101,20 +102,31 @@ public class Player extends Entity {
 			}
 		}
 		
-		if(temp != null) Powerup.POWERUPS.remove(temp);
+		if(temp != null)  {
+			Powerup.POWERUPS.remove(temp);
+			if(powerup == UnliAmmoPowerup.ID) {
+				fired = false;
+			}
+		}
 	}
 	
 	public void fire() {
 		if(!fired) {
 			new BulletPlayer(this);
 			fire.play();
+			
+			
 			fired = true;
 			
 			new Thread() {
 				@Override
 				public void run() {
 					try {
-						Thread.sleep(500);
+						if(powerup != UnliAmmoPowerup.ID) {
+							Thread.sleep(500);
+						} else {
+							Thread.sleep(100);
+						}
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -140,6 +152,10 @@ public class Player extends Entity {
 	
 	public boolean getFired() {
 		return this.fired;
+	}
+	
+	public int getPowerup() {
+		return this.powerup;
 	}
 	
 	public boolean isDead() {

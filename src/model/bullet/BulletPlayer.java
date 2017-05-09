@@ -22,9 +22,6 @@ public class BulletPlayer extends Bullet {
 						if(hitsEnemy()) {
 							owner.addScore(10);
 							break;
-						} else if(hitsBullet()) {
-							owner.addScore(5);
-							break;
 						}
 						
 						BulletPlayer.this.setY(BulletPlayer.this.getY() - increment);
@@ -57,23 +54,6 @@ public class BulletPlayer extends Bullet {
 						Enemy.ENEMIES.remove(Enemy.ENEMIES.get(i));
 					}
 					
-					return true;
-				}
-			}
-			
-			return false;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-	
-	public boolean hitsBullet() {
-		try{
-			for(int i=0; i<Bullet.BULLETS.size(); i++) {
-				if(Bullet.BULLETS.get(i) == this) continue;
-				else if(this.boundingRect().intersects(Bullet.BULLETS.get(i).boundingRect())) {
-					Bullet.BULLETS.get(i).interrupt();
 					return true;
 				}
 			}
