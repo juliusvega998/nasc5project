@@ -23,7 +23,10 @@ public class EnemyMovementThread extends Thread {
 				
 				if(e.boundingRect().intersects(Forest.getInstance().boundingRect())) {
 					if(Player.getInstance().getPowerup() != ShieldPowerup.ID) {
-						Forest.getInstance().damage(15);
+						if(e instanceof EnemyFast)
+							Forest.getInstance().damage(15, e);
+						else
+							Forest.getInstance().damage(10, e);
 					}
 					
 					e.kill();

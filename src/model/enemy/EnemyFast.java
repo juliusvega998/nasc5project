@@ -6,8 +6,8 @@ import org.newdawn.slick.geom.Rectangle;
 public class EnemyFast extends Enemy {
 	public static final float SPEED = 1;
 	
-	public EnemyFast(float x, float y, Sound hurt, Sound shoot) {
-		super(x, y, hurt, shoot);
+	public EnemyFast(float x, float y, Sound hurt) {
+		super(x, y, hurt);
 	}
 	
 	@Override

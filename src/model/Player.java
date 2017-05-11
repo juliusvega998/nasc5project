@@ -5,6 +5,7 @@ import org.newdawn.slick.geom.Rectangle;
 
 import model.bullet.BulletPlayer;
 import model.powerup.Powerup;
+import model.powerup.ShieldPowerup;
 import model.powerup.UnliAmmoPowerup;
 import util.Config;
 
@@ -14,7 +15,8 @@ public class Player extends Entity {
 	public static final int HEIGHT = 40;
 	
 	private Sound fire;
-	private Sound killed;
+	private Sound shield;
+	private Sound unliammo;
 	
 	private int score;
 	private int powerup;
@@ -24,15 +26,16 @@ public class Player extends Entity {
 	
 	private static Player instance;
 	
-	private Player(Sound fire, Sound killed) {
-		super((Config.WIDTH-Player.WIDTH)/2, (Config.HEIGHT-Player.HEIGHT)*0.75f);
+	private Player(Sound fire, Sound shield, Sound unliammo) {
+		super((Config.WIDTH-Player.WIDTH)/2, (Config.HEIGHT-Player.HEIGHT)*0.90f);
 		this.score = 0;
 		this.powerup = Powerup.DEFAULT;
 		this.fired = false;
 		this.dead = false;
 		
 		this.fire = fire;
-		this.killed = killed;
+		this.shield = shield;
+		this.unliammo = unliammo;
 	}
 	
 	public void reset() {
@@ -85,7 +88,13 @@ public class Player extends Entity {
 		for(Powerup p : Powerup.POWERUPS) {
 			if(this.boundingRect().intersects(p.boundingRect())) {
 				this.powerup = p.getPowerup();
-				System.out.println("Powerup: " + this.powerup);
+				
+				if(this.powerup == ShieldPowerup.ID) {
+					shield.play();
+				} else {
+					unliammo.play();
+				}
+
 				new Thread() {
 					@Override
 					public void run() {
@@ -93,7 +102,6 @@ public class Player extends Entity {
 							Thread.sleep(10000); //10 seconds
 						} catch(Exception e) {}
 						Player.this.powerup = Powerup.DEFAULT;
-						System.out.println("Powerup Expired.");
 					}
 				}.start();
 				
@@ -138,7 +146,6 @@ public class Player extends Entity {
 	}
 	
 	public void kill() {
-		killed.play();
 		this.dead = true;
 	}
 	
@@ -166,9 +173,9 @@ public class Player extends Entity {
 		return new Rectangle(this.getX(), this.getY(), WIDTH, HEIGHT);
 	}
 	
-	public static Player getInstance(Sound fire, Sound killed) {
+	public static Player getInstance(Sound fire, Sound shield, Sound unliammo) {
 		if(instance == null) {
-			instance = new Player(fire, killed);
+			instance = new Player(fire, shield, unliammo);
 		}
 		
 		return instance;

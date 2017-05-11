@@ -2,6 +2,7 @@ package model.bullet;
 
 import model.Player;
 import model.enemy.Enemy;
+import model.volunteer.Volunteer;
 
 public class BulletPlayer extends Bullet {
 	private Player owner;
@@ -21,6 +22,10 @@ public class BulletPlayer extends Bullet {
 					while(BulletPlayer.this.getY() > 0) {
 						if(hitsEnemy()) {
 							owner.addScore(10);
+							break;
+						}
+						
+						if(hitsVolunteer()) {
 							break;
 						}
 						
@@ -52,6 +57,27 @@ public class BulletPlayer extends Bullet {
 					if(Enemy.ENEMIES.get(i).isDead()) {
 						Enemy.ENEMIES.get(i).interrupt();
 						Enemy.ENEMIES.remove(Enemy.ENEMIES.get(i));
+					}
+					
+					return true;
+				}
+			}
+			
+			return false;
+		} catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean hitsVolunteer() {
+		try{
+			for(int i=0; i<Volunteer.VOLUNTEERS.size(); i++) {
+				if(this.boundingRect().intersects(Volunteer.VOLUNTEERS.get(i).boundingRect())) {
+					Volunteer.VOLUNTEERS.get(i).playDead();
+					if(Volunteer.VOLUNTEERS.get(i).isDead()) {
+						Volunteer.VOLUNTEERS.get(i).interrupt();
+						Volunteer.VOLUNTEERS.remove(Volunteer.VOLUNTEERS.get(i));
 					}
 					
 					return true;

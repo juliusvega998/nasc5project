@@ -24,17 +24,21 @@ import model.enemy.Enemy;
 import model.enemy.EnemyFast;
 import model.powerup.Powerup;
 import model.powerup.ShieldPowerup;
+import model.powerup.UnliAmmoPowerup;
+import model.volunteer.Volunteer;
 import util.Config;
 
 public class SpaceImpact extends BasicGame {	
 	private Player player;
 	private Forest forest;
 	
-	private Animation playerSheet;
+	private Animation playerSheetN;
+	private Animation playerSheetU;
 	private Image pBulletSheet;
 	
 	private Animation enemySheetN;
 	private Animation enemySheetF;
+	private Animation volunteerSheet;
 	
 	private Image logo;
 	private Image start;
@@ -50,9 +54,16 @@ public class SpaceImpact extends BasicGame {
 	private Image dirtRoad;
 	
 	private Sound cupidFire;
-	private Sound enemyFire;
-	private Sound cupidDead;
+	
+	private Sound shieldSound;
+	private Sound unliammoSound;
+	
+	private Sound cutSound;
+	private Sound fireSound;
+	private Sound healSound;
+	
 	private Sound enemyHurt;
+	private Sound volunteerHurt;
 	
 	private Music music;
 	
@@ -80,19 +91,28 @@ public class SpaceImpact extends BasicGame {
 		this.show = true;
 		this.rand = new Random();
 		
-		this.playerSheet = new Animation(new SpriteSheet("resources/img/planes.png", 40, 40), 250);
+		this.playerSheetN = new Animation(new SpriteSheet("resources/img/planes.png", 40, 40), 250);
+		this.playerSheetU = new Animation(new SpriteSheet("resources/img/planes-up.png", 40, 40), 50);
 		this.enemySheetN = new Animation(new SpriteSheet("resources/img/enemy.png", 100, 100), 150);
 		this.enemySheetF = new Animation(new SpriteSheet("resources/img/enemy2.png", 100, 100), 50);
 		
+		this.volunteerSheet = new Animation(new SpriteSheet("resources/img/volunteer.png", 100, 100), 150);
+		
 		this.cupidFire = new Sound("resources/sound/cupid_shoot.wav");
-		this.enemyFire = new Sound("resources/sound/enemy_shoot.wav");
-		this.cupidDead = new Sound("resources/sound/cupid_dead.wav");
+		this.shieldSound = new Sound("resources/sound/shield.wav");
+		this.unliammoSound = new Sound("resources/sound/unliammo.wav");
+		
+		this.cutSound = new Sound("resources/sound/cut.wav");
+		this.fireSound = new Sound("resources/sound/fire.wav");
+		this.healSound = new Sound("resources/sound/heal.wav");
+		
 		this.enemyHurt = new Sound("resources/sound/enemy_dead.wav");
+		this.volunteerHurt = new Sound("resources/sound/volunteer_hurt.wav");
 		
 		this.music = new Music("resources/sound/music.ogg");
 		
-		this.player = Player.getInstance(cupidFire, cupidDead);
-		this.forest = Forest.getInstance();
+		this.player = Player.getInstance(cupidFire, shieldSound, unliammoSound);
+		this.forest = Forest.getInstance(cutSound, fireSound, healSound);
 		
 		this.pBulletSheet = new Image("resources/img/net.png");
 		this.logo = new Image("resources/img/logo.png");
@@ -155,21 +175,29 @@ public class SpaceImpact extends BasicGame {
 		} else if(mode == 1) {
 			if(Enemy.ENEMIES.size() == 0) {
 				level++;
-				forest.spawnPowerup();
+				
+				if(level > 1) forest.spawnPowerup();
+				
 				for(int i=0; i<level; i++) {
 					if(i%3 == 0 && i != 0) {
 						new EnemyFast(
 								rand.nextInt(Config.WIDTH-2*EnemyFast.WIDTH) + EnemyFast.WIDTH, 
 								EnemyFast.HEIGHT*-1-i-i/3, 
-								this.enemyHurt, 
-								this.enemyFire
+								this.enemyHurt
 						);
 					} else {
 						new Enemy(
 								rand.nextInt(Config.WIDTH-2*Enemy.WIDTH) + Enemy.WIDTH, 
 								Enemy.HEIGHT*-1-i, 
-								this.enemyHurt, 
-								this.enemyFire
+								this.enemyHurt
+						);
+					}
+					
+					if(i%5 == 0 && forest.getLife() < Forest.MAX_LIFE) {
+						new Volunteer(
+								rand.nextInt(Config.WIDTH-2*Volunteer.WIDTH) + Volunteer.WIDTH, 
+								Volunteer.HEIGHT*-1-i, 
+								this.volunteerHurt
 						);
 					}
 				}
@@ -223,6 +251,7 @@ public class SpaceImpact extends BasicGame {
 		
 		Enemy.reset();
 		Bullet.reset();
+		Volunteer.reset();
 		Powerup.POWERUPS.clear();
 	}
 	
@@ -262,9 +291,9 @@ public class SpaceImpact extends BasicGame {
 	public void renderMenu(Graphics graphics) {
 		logo.draw(Config.WIDTH/2 - logo.getWidth()/2, Config.HEIGHT/10);
 		
-		titles.drawString(10, 10, "Music: http://www.bensound.com/", Color.black);
+		titles.drawString(10, 10, "Music: http://www.youtube.com/ourmusicbox", Color.black);
 		if(show) {
-			start.draw(Config.WIDTH/2-62, Config.HEIGHT/4*3-12);
+			start.draw(Config.WIDTH/2-start.getWidth()/2, Config.HEIGHT/5*4-15);
 		}
 	}
 	
@@ -297,18 +326,24 @@ public class SpaceImpact extends BasicGame {
 				try {
 					Enemy e = Enemy.ENEMIES.get(i);
 					
-					graphics.setColor(Color.green);
 					if (e instanceof EnemyFast) {
-						graphics.fillRect(e.getX(), e.getY() - 10, EnemyFast.WIDTH, 5);
 						enemySheetF.draw(e.getX(), e.getY(), EnemyFast.WIDTH, EnemyFast.HEIGHT);
 					} else {
-						graphics.fillRect(e.getX(), e.getY() - 10, Enemy.WIDTH, 5);
 						enemySheetN.draw(e.getX(), e.getY(), Enemy.WIDTH, Enemy.HEIGHT);
 					}
 					
 				} catch(Exception e) {}
 			}
 			graphics.setColor(Color.black);
+			
+			for(int i=0; i<Volunteer.VOLUNTEERS.size(); i++) {
+				try {
+					Volunteer e = Volunteer.VOLUNTEERS.get(i);
+					
+					volunteerSheet.draw(e.getX(), e.getY(), Enemy.WIDTH, Enemy.HEIGHT);
+					
+				} catch(Exception e) {}
+			}
 			
 			for(int i=0; i<Powerup.POWERUPS.size(); i++) {
 				Powerup p = Powerup.POWERUPS.get(i);
@@ -330,7 +365,10 @@ public class SpaceImpact extends BasicGame {
 					Color.red
 			);
 		} else {
-			playerSheet.draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT);
+			if(player.getPowerup() == UnliAmmoPowerup.ID)
+				playerSheetU.draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT);
+			else
+				playerSheetN.draw(player.getX(), player.getY(), Player.WIDTH, Player.HEIGHT);
 		}
 	}
 

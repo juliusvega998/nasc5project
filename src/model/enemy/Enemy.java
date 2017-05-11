@@ -22,14 +22,12 @@ public class Enemy extends Entity {
 	protected EnemyMovementThread move;
 	
 	private Sound hurt;
-	protected Sound shoot;
 	
-	public Enemy(float x, float y, Sound hurt, Sound shoot) {
+	public Enemy(float x, float y, Sound hurt) {
 		super(x, y);
 		
 		rand = new Random();
 		this.hurt = hurt;
-		this.shoot = shoot;
 		this.life = 1;
 		this.move = new EnemyMovementThread(this);
 		
@@ -37,12 +35,11 @@ public class Enemy extends Entity {
 		this.move.start();
 	}
 	
-	public Enemy(float x, float y, int life, Sound hurt, Sound shoot) {
+	public Enemy(float x, float y, int life, Sound hurt) {
 		super(x, y);
 		
 		rand = new Random();
 		this.hurt = hurt;
-		this.shoot = shoot;
 		this.life = life;
 		this.move = new EnemyMovementThread(this);
 		
